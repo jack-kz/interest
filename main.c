@@ -1,274 +1,353 @@
 #include"acllib.h"
 #include<stdio.h>
 #include<time.h>
-int even=2;
-int eat_x=-1;
-int eat_y=0;
-int door_1_x=35;
-int door_1_y=20;
-int door_2_x=65;
-int door_2_y=40;
-int score=0; 
-int loca[6000];
-int eatl=-1;
-typedef struct _snake{
-	int snake_x;
-	int snake_y;
-	int snake_direction;
-	struct _snake *next;
-}snake;
-snake snakebegin;
-snake *snakehead=&snakebegin;
-
-typedef struct _location{
-	int loca[6000][2];
-	int cnt;
-}location;
-location lo;
-location *l=&lo;
-void snake_draw(int x,int y){
+int site[600][4];
+int score=0;
+int n=80; 
+int t=0;
+void background(){
+	int i=0;
+	int j=0;
 	beginPaint();
-	x=8*x;
-	y=8*y;
-	int i=y;
-	for(i;i<y+8;i++){
-		line(x,i,x+8,i);
-	}
-	//putPixel(x,y,RED);
+	for(i=0;i<601;i+=20)
+		line(i,0,i,400);
+	for(i=0;i<401;i+=20)
+		line(0,i,600,i);
 	endPaint();
 }
-
-void snake_door(int x,int y){
-	beginPaint();
-	x=8*x;
-	y=8*y;
-		line(x,y,x+8,y);
-		line(x,y,x,y+8);
-		line(x+7,y,x+7,y+8);
-		line(x,y+7,x+8,y+7);
-	//putPixel(x,y,RED);
-	endPaint();
-}
-
-void snake_move(){
-	//loca_res();
-	snake *p=snakehead;
-	snake ts_1;
-	snake ts_2;
-	//snake *r1=&ts_1;
-	snake *r2=&ts_2;
-	for(ts_2=*snakehead,p=snakehead->next;p;ts_2=ts_1,p=p->next){
-		ts_1=*p;
-		p->snake_x=r2->snake_x;
-		p->snake_y=r2->snake_y;
-		p->snake_direction=r2->snake_direction;
-		//printf("x=%d,y=%d\n",r->snake_x,r->snake_y);
-		snake_draw(p->snake_x,p->snake_y);
-		//loca[p->snake_x+p->snake_y*100]=0;
+void num_mode(int x,int y,int z){
+	int i=0;
+	switch(z){
 		
-	}
-	p=snakehead;
-	switch (p->snake_direction){
-		case 37:
-			if(p->snake_x==door_1_x&&p->snake_y==door_1_y){
-				p->snake_x=door_2_x;
-				p->snake_y=door_2_y;
-			}else if(p->snake_x==door_2_x&&p->snake_y==door_2_y){
-				p->snake_x=door_1_x;
-				p->snake_y=door_1_y;
-			} 
-			if(p->snake_x<=0) p->snake_x=100;
-			p->snake_x--;
-			break;
-		case 38:
-			if(p->snake_x==door_1_x&&p->snake_y==door_1_y){
-				p->snake_x=door_2_x;
-				p->snake_y=door_2_y;
-			}else if(p->snake_x==door_2_x&&p->snake_y==door_2_y){
-				p->snake_x=door_1_x;
-				p->snake_y=door_1_y;
-			} 
-			if(p->snake_y<=0) p->snake_y=60;
-			p->snake_y--;
-			break;
-		case 39:
-			if(p->snake_x==door_1_x&&p->snake_y==door_1_y){
-				p->snake_x=door_2_x;
-				p->snake_y=door_2_y;
-			}else if(p->snake_x==door_2_x&&p->snake_y==door_2_y){
-				p->snake_x=door_1_x;
-				p->snake_y=door_1_y;
+		case 1:
+			for(i=x+13;i<x+15;i++){
+				line(i,y+3,i,y+17);
 			}
-			if(p->snake_x>=99) p->snake_x=-1;
-			p->snake_x++;
 			break;
-		case 40:
-			if(p->snake_x==door_1_x&&p->snake_y==door_1_y){
-				p->snake_x=door_2_x;
-				p->snake_y=door_2_y;
-			}else if(p->snake_x==door_2_x&&p->snake_y==door_2_y){
-				p->snake_x=door_1_x;
-				p->snake_y=door_1_y;
+		case 2:
+			for(i=y+3;i<y+5;i++){
+				line(x+6,i,x+15,i);
 			}
-			if(p->snake_y>=59) p->snake_y=-1;
-			p->snake_y++;
+			for(i;i<y+9;i++){
+				line(x+14,i,x+15,i);
+			}
+			for(i;i<y+11;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+15;i++){
+				line(x+6,i,x+7,i);
+			}
+			for(i;i<y+17;i++){
+				line(x+6,i,x+15,i);
+			}
+			break;
+		case 3:
+			for(i=y+3;i<y+5;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+9;i++){
+				line(x+14,i,x+15,i);
+			}
+			for(i;i<y+11;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+15;i++){
+				line(x+14,i,x+15,i);
+			}
+			for(i;i<y+17;i++){
+				line(x+6,i,x+15,i);
+			}
+			break;
+		case 4:
+			for(i=y+3;i<y+9;i++){
+				line(x+6,i,x+7,i);
+				line(x+14,i,x+15,i);
+			}
+			for(i;i<y+11;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+17;i++){
+				line(x+14,i,x+15,i);
+			}
+			break;
+		case 5:
+			for(i=y+3;i<y+5;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+9;i++){
+				line(x+6,i,x+7,i);
+			}
+			for(i;i<y+11;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+15;i++){
+				line(x+14,i,x+15,i);
+			}
+			for(i;i<y+17;i++){
+				line(x+6,i,x+15,i);
+			}
+			break;
+		case 6:
+			for(i=y+3;i<y+5;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+9;i++){
+				line(x+6,i,x+7,i);
+			}
+			for(i;i<y+11;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+15;i++){
+				line(x+6,i,x+7,i);
+				line(x+14,i,x+15,i);
+			}
+			for(i;i<y+17;i++){
+				line(x+6,i,x+15,i);
+			}
+			break;
+		case 7:
+			for(i=y+3;i<y+5;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+17;i++){
+				line(x+14,i,x+15,i);
+			}
+			break;
+		case 8:
+			for(i=y+3;i<y+5;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+9;i++){
+				line(x+6,i,x+7,i);
+				line(x+14,i,x+15,i);
+			}
+			for(i;i<y+11;i++){
+				line(x+6,i,x+15,i);
+			}
+			for(i;i<y+15;i++){
+				line(x+6,i,x+7,i);
+				line(x+14,i,x+15,i);
+			}
+			for(i;i<y+17;i++){
+				line(x+6,i,x+15,i);
+			}
 			break;
 	}
-	snake_draw(p->snake_x,p->snake_y);
 }
-void snake_long(){
-	int a=0;
-	snake *p=snakehead;
-	for(p;p;p=p->next){
-		a++;
-		printf("%d: x=%d,y=%d\n",a,p->snake_x,p->snake_y);
-	}
-}
-void snake_add(){
-	snake *q=(snake*)malloc(sizeof(snake));
-	q->next=NULL;
-	snake *p=snakehead;
+void site_draw(int x,int y,int j){
 	
-	for(;p->next;p=p->next){}
-	q->snake_direction=p->snake_direction;
-	p->next=q;
+	int z=site[j][2];
+	x=x*20;
+	y=y*20;
+	int i=0;
+	beginPaint();
+	if(z==9){
+		setPenColor(RGB(200,200,200));
+	}else if(z==10){
+		setPenColor(GREEN);
+	}else if(z==1){
+		setPenColor(WHITE);
+	}else if(z==2){
+		setPenColor(RED);
+	}
+	
+	for(i=x+1;i<x+20;i++){
+		line(i,y+1,i,y+20);
+	}
+	setPenColor(BLACK);
+	if(z==1&&site[j][1]!=0){
+		num_mode(x,y,site[j][1]);
+	}
+	endPaint();
+	
+	
 }
 
-void loca_res(){
-	int i=0;
-	l->cnt=0;
-	for(i=0;i<6000;i++){
-		loca[i]=1;
-		l->loca[i][0]=0;
-		l->loca[i][1]=0;
+void show(int n){
+	if(n>=0&&n<600&&site[n][1]==0&&site[n][3]<2){
+		if(n-1>=0&&n%30!=0){
+			site[n-1][2]=1;
+			site[n-1][3]++;
+			show(n-1);
+		}
+		if(n+1<600&&n%30!=29){
+			site[n+1][2]=1;
+			site[n+1][3]++;
+			show(n+1);
+		}
+		if(n-30>=0){
+			site[n-30][2]=1;
+			site[n-30][3]++;
+			show(n-30);
+		}
+		if(n+30<600){
+			site[n+30][2]=1;
+			site[n+30][3]++;
+			show(n+30);
+		}
+		if(n-31>=0&&n%30!=0){
+			site[n-31][3]++;
+			site[n-31][2]=1;
+			show(n-31);
+		}
+		if(n-29>=0&&n%30!=29){
+			site[n-29][3]++;
+			site[n-29][2]=1;
+			show(n-29);
+		}
+		if(n+29<600&&n%30!=0){
+			site[n+29][2]=1;
+			site[n+29][3]++;
+			show(n+29);
+		}
+		if(n+31<600&&n%30!=29){
+			site[n+31][2]=1;
+			site[n+31][3]++;
+			show(n+31);
+		}
 	}
-	loca[door_1_x+door_1_y*100]=0;
-	loca[door_2_x+door_2_y*100]=0;
+} 
+void visit(int x,int y,int z){
+	x=x*20;
+	y=y*20;
+	int i=0;
+	beginPaint();
+	if(site[z][0]==1){
+		setPenColor(RED);
+	}else if(site[z][2]==9&&site[z][1]!=0){
+		setPenColor(YELLOW);
+	}else if(site[z][2]==9){
+		setPenColor(RGB(200,200,200));
+	}
+	for(i=x+1;i<x+20;i++){
+		line(i,y+1,i,y+20);
+	}
+	setPenColor(BLACK);
+	endPaint();
 }
 
-void snake_eat(){
-	snake *p=snakehead;
+void refresh(){
 	int i=0;
-	if(p->snake_x==eat_x&&p->snake_y==eat_y){
-		snake_add();
-		score++;
-		printf("score = %d\n",score);
-		eat_x=-1;
+	int a=0;
+	int b=0;
+	for(i=0;i<600;i++){
+		site_draw(i%30,i/30,i);
+		//visit(i%30,i/30,i);
+		if(site[i][0]){
+			a++;
+		}
+		if(site[i][2]==1){
+			b++;
+		}
 	}
-	//printf("1");
-	if(eat_x==-1){
-		
-		//int a=1;
-		//while(a){
-		loca_res();
-		//printf("2");
-		p=snakehead;
-		for(p;p->next;p=p->next){
-			loca[p->snake_x+(p->snake_y)*100]=0;
-		}
-		//while(p!=NULL){
-			
-		//	p=p->next;
-		//}
-		
-		l->cnt=0;
-		int x=0;
-		for(i=0;i<6000;i++){
-			if(loca[i]){
-				x=l->cnt;
-				l->loca[x][0]=i%100;
-				l->loca[x][1]=i/100;
-				l->cnt++;
-			}
-		}
-		//printf("3");
-		//printf("cnt = %d",l->cnt);
-			srand(time(0));
-			eatl=rand()%(l->cnt/100);
-			//printf("\neatl = %d",eatl);
-			if(eatl>0){
-				eatl=eatl*100-rand()%(100)+l->cnt%100; 
-			}else{
-				eatl=rand()%(100);
-				if(eatl>l->cnt%100&&l->cnt/100==0){
-					eatl=l->cnt;
-				}
-			}
-			
-			eat_x=l->loca[eatl][0];
-			eat_y=l->loca[eatl][1];
-			//for(p=snakehead;p->next;p=p->next){
-			//	if(eat_x==p->snake_x&&eat_y==p->snake_y){
-			//		break;
-			//	}
-			//}
-			//if(p->next==NULL&&(eat_x!=door_1_x&&eat_y!=door_1_y)&&(eat_x!=door_2_x&&eat_y!=door_2_y)){
-			//	a=0;
-			//}
-		//}
+	if(a+b==600){
+		printf("YOU WIN ! ! !");
+		printf("   time = %ds\n",t);
 	}
 }
-void keyListener(int key,int event){
-	if(key>=37&&key<=40){
-		if(event==0&&even==2){
-			even=1;
-		}else if(event==0&&even==1){
-			even=0;
-		}else if(event==1){
-			even=2;
+void check(int n){
+	
+	if(n-1>=0&&n%30!=0&&site[n-1][0]==1){
+		site[n][1]++;
+	}
+	if(n+1<600&&n%30!=29&&site[n+1][0]==1){
+		site[n][1]++;
+	}
+	if(n-30>=0&&site[n-30][0]==1){
+		site[n][1]++;
+	}
+	if(n-31>=0&&n%30!=0&&site[n-31][0]==1){
+		site[n][1]++;
+	}
+	if(n-29>=0&&n%30!=29&&site[n-29][0]==1){
+		site[n][1]++;
+	}
+	if(n+30<600&&site[n+30][0]==1){
+		site[n][1]++;
+	}
+	if(n+29<600&&n%30!=0&&site[n+29][0]==1){
+		site[n][1]++;
+	}
+	if(n+31<600&&n%30!=29&&site[n+31][0]==1){
+		site[n][1]++;
+	}
+	
+}
+void start(){
+	int i=0;
+	int a=0;
+	score=0;
+	t=0;
+	for(i=0;i<600;i++){
+		site[i][0]=0;
+		site[i][1]=0;
+		site[i][2]=9;
+		site[i][3]=0;
+	}
+	srand(time(0));
+	for(i=0;i<n;i++){
+		a=rand()%(60);
+		if(a>0){
+			site[a*10-rand()%(10)][0]=1;	
+		}else{
+			site[rand()%(10)][0]=1;
 		}
-		if(even==1){
-			snakehead->snake_direction=key;
-			beginPaint();
-			clearDevice();
-			endPaint();
-			snake_door(door_1_x,door_1_y);
-			snake_door(door_2_x,door_2_y);
-			snake_eat();
-			snake_move();
-			snake_draw(eat_x,eat_y);
+	}
+	
+	for(i=0;i<600;i++){
+		check(i); 
+	}
+	refresh();
+}
+
+void mouseListener(int x,int y,int button,int event){
+	int x1=0;
+	int y1=0;
+	x1=x/20;
+	y1=y/20;
+	if(button==1&&event==0){
+		if(site[x1+y1*30][0]){
+			site[x1+y1*30][2]=2;
+			printf("your last score : %d  ,time = %ds\n",score,t);
 			
-			
-				
+			start();
+		}else{
+			score++;
+			site[x1+y1*30][2]=1;
+			show(x1+y1*30); 
 		}
-	//printf("key = %d,event = %d\n ",key,event);
-	} 	
+		
+		refresh();
+	}
+	if(button==3&&event==0){
+		if(site[x1+y1*30][2]==9){
+			site[x1+y1*30][2]=10;
+		}else if(site[x1+y1*30][2]==10){
+			site[x1+y1*30][2]=9;
+		}
+		
+		refresh();
+	}
 }
 void timerListener(int id){
-	switch (id){
-		case 0:
-			beginPaint();
-			clearDevice();
-			endPaint();
-			snake_door(door_1_x,door_1_y);
-			snake_door(door_2_x,door_2_y);
-			snake_eat();
-			snake_move();
-			snake_draw(eat_x,eat_y);
-			
-			break;
-	}
-}
+	t++;
 
-void initi(){
-	snake *p=snakehead;
-	p->next=NULL;
-	p->snake_direction=39;
-	p->snake_x=20;
-	p->snake_y=20;
-	
 }
-
 
 int Setup(){
 	initConsole();
-	initWindow("Ì°Ê³Éß",200,200,800,480);
-	initi();
-	loca_res();
-	snake_eat();
-	registerKeyboardEvent(keyListener);
+	initWindow("É¨À×",200,200,601,401);
+	
+	/*while(n<1||n>600){
+		printf("please enter the number of bomb £¨0<n<600£©: ");
+		scanf("%d",&n);
+	}*/
+	printf("Õ¨µ¯´ó¸Å£º%d¸ö\n",n);
+	background();
+	start();
+	registerMouseEvent(mouseListener);
 	registerTimerEvent(timerListener);
-	startTimer(0,300);
+	startTimer(0,1000);
 	return 0;
 }
  
