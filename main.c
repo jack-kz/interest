@@ -1,274 +1,413 @@
 #include"acllib.h"
 #include<stdio.h>
 #include<time.h>
-int even=2;
-int eat_x=-1;
-int eat_y=0;
-int door_1_x=35;
-int door_1_y=20;
-int door_2_x=65;
-int door_2_y=40;
-int score=0; 
-int loca[6000];
-int eatl=-1;
-typedef struct _snake{
-	int snake_x;
-	int snake_y;
-	int snake_direction;
-	struct _snake *next;
-}snake;
-snake snakebegin;
-snake *snakehead=&snakebegin;
+#define x_x 9
+#define y_y 9
+#define mp 73//扩大倍率 
+int even=0;
+int site[x_x*y_y][2];//数据记录数组 
+int nandu=35;//控制难度 
+int place=0;//记录数独在list中位置 
+int time_start=0,time_end=0; 
 
-typedef struct _location{
-	int loca[6000][2];
-	int cnt;
-}location;
-location lo;
-location *l=&lo;
-void snake_draw(int x,int y){
+
+void bg();
+void num_mode(int x,int y,int z,int bl);
+void refresh();
+void start();
+int check(int p[][2],int cnt); 
+void bg(){
+	int i;
 	beginPaint();
-	x=8*x;
-	y=8*y;
-	int i=y;
-	for(i;i<y+8;i++){
-		line(x,i,x+8,i);
+	setPenColor(RGB(200,200,200));
+	for(i=0;i<=x_x;i++){
+		line(i*mp,0,i*mp,y_y*mp);
+		if(i%3==0){
+			setPenColor(BLACK);
+			line(i*mp,0,i*mp,y_y*mp);
+			setPenColor(RGB(200,200,200));
+		} 
 	}
-	//putPixel(x,y,RED);
-	endPaint();
-}
-
-void snake_door(int x,int y){
-	beginPaint();
-	x=8*x;
-	y=8*y;
-		line(x,y,x+8,y);
-		line(x,y,x,y+8);
-		line(x+7,y,x+7,y+8);
-		line(x,y+7,x+8,y+7);
-	//putPixel(x,y,RED);
-	endPaint();
-}
-
-void snake_move(){
-	//loca_res();
-	snake *p=snakehead;
-	snake ts_1;
-	snake ts_2;
-	//snake *r1=&ts_1;
-	snake *r2=&ts_2;
-	for(ts_2=*snakehead,p=snakehead->next;p;ts_2=ts_1,p=p->next){
-		ts_1=*p;
-		p->snake_x=r2->snake_x;
-		p->snake_y=r2->snake_y;
-		p->snake_direction=r2->snake_direction;
-		//printf("x=%d,y=%d\n",r->snake_x,r->snake_y);
-		snake_draw(p->snake_x,p->snake_y);
-		//loca[p->snake_x+p->snake_y*100]=0;
-		
+	for(i=0;i<= y_y;i++){
+		line(0,i*mp,x_x*mp,i*mp);
+		if(i%3==0){
+			setPenColor(BLACK);
+			line(0,i*mp,x_x*mp,i*mp);
+			setPenColor(RGB(200,200,200));
+		} 
 	}
-	p=snakehead;
-	switch (p->snake_direction){
-		case 37:
-			if(p->snake_x==door_1_x&&p->snake_y==door_1_y){
-				p->snake_x=door_2_x;
-				p->snake_y=door_2_y;
-			}else if(p->snake_x==door_2_x&&p->snake_y==door_2_y){
-				p->snake_x=door_1_x;
-				p->snake_y=door_1_y;
-			} 
-			if(p->snake_x<=0) p->snake_x=100;
-			p->snake_x--;
-			break;
-		case 38:
-			if(p->snake_x==door_1_x&&p->snake_y==door_1_y){
-				p->snake_x=door_2_x;
-				p->snake_y=door_2_y;
-			}else if(p->snake_x==door_2_x&&p->snake_y==door_2_y){
-				p->snake_x=door_1_x;
-				p->snake_y=door_1_y;
-			} 
-			if(p->snake_y<=0) p->snake_y=60;
-			p->snake_y--;
-			break;
-		case 39:
-			if(p->snake_x==door_1_x&&p->snake_y==door_1_y){
-				p->snake_x=door_2_x;
-				p->snake_y=door_2_y;
-			}else if(p->snake_x==door_2_x&&p->snake_y==door_2_y){
-				p->snake_x=door_1_x;
-				p->snake_y=door_1_y;
-			}
-			if(p->snake_x>=99) p->snake_x=-1;
-			p->snake_x++;
-			break;
-		case 40:
-			if(p->snake_x==door_1_x&&p->snake_y==door_1_y){
-				p->snake_x=door_2_x;
-				p->snake_y=door_2_y;
-			}else if(p->snake_x==door_2_x&&p->snake_y==door_2_y){
-				p->snake_x=door_1_x;
-				p->snake_y=door_1_y;
-			}
-			if(p->snake_y>=59) p->snake_y=-1;
-			p->snake_y++;
-			break;
+	for(i=mp;i<2*mp;i++){
+		line(10*mp,i,11*mp,i);
 	}
-	snake_draw(p->snake_x,p->snake_y);
-}
-void snake_long(){
-	int a=0;
-	snake *p=snakehead;
-	for(p;p;p=p->next){
-		a++;
-		printf("%d: x=%d,y=%d\n",a,p->snake_x,p->snake_y);
+	for(i=3*mp;i<4*mp;i++){
+		line(10*mp,i,11*mp,i);
 	}
-}
-void snake_add(){
-	snake *q=(snake*)malloc(sizeof(snake));
-	q->next=NULL;
-	snake *p=snakehead;
+	for(i=5*mp;i<6*mp;i++){
+		line(10*mp,i,11*mp,i);
+	}
 	
-	for(;p->next;p=p->next){}
-	q->snake_direction=p->snake_direction;
-	p->next=q;
+	setPenColor(BLACK);
+	endPaint();
 }
-
-void loca_res(){
+void num_mode(int x,int y,int z,int bl){
 	int i=0;
-	l->cnt=0;
-	for(i=0;i<6000;i++){
-		loca[i]=1;
-		l->loca[i][0]=0;
-		l->loca[i][1]=0;
-	}
-	loca[door_1_x+door_1_y*100]=0;
-	loca[door_2_x+door_2_y*100]=0;
-}
-
-void snake_eat(){
-	snake *p=snakehead;
-	int i=0;
-	if(p->snake_x==eat_x&&p->snake_y==eat_y){
-		snake_add();
-		score++;
-		printf("score = %d\n",score);
-		eat_x=-1;
-	}
-	//printf("1");
-	if(eat_x==-1){
-		
-		//int a=1;
-		//while(a){
-		loca_res();
-		//printf("2");
-		p=snakehead;
-		for(p;p->next;p=p->next){
-			loca[p->snake_x+(p->snake_y)*100]=0;
-		}
-		//while(p!=NULL){
-			
-		//	p=p->next;
-		//}
-		
-		l->cnt=0;
-		int x=0;
-		for(i=0;i<6000;i++){
-			if(loca[i]){
-				x=l->cnt;
-				l->loca[x][0]=i%100;
-				l->loca[x][1]=i/100;
-				l->cnt++;
-			}
-		}
-		//printf("3");
-		//printf("cnt = %d",l->cnt);
-			srand(time(0));
-			eatl=rand()%(l->cnt/100);
-			//printf("\neatl = %d",eatl);
-			if(eatl>0){
-				eatl=eatl*100-rand()%(100)+l->cnt%100; 
-			}else{
-				eatl=rand()%(100);
-				if(eatl>l->cnt%100&&l->cnt/100==0){
-					eatl=l->cnt;
-				}
-			}
-			
-			eat_x=l->loca[eatl][0];
-			eat_y=l->loca[eatl][1];
-			//for(p=snakehead;p->next;p=p->next){
-			//	if(eat_x==p->snake_x&&eat_y==p->snake_y){
-			//		break;
-			//	}
-			//}
-			//if(p->next==NULL&&(eat_x!=door_1_x&&eat_y!=door_1_y)&&(eat_x!=door_2_x&&eat_y!=door_2_y)){
-			//	a=0;
-			//}
-		//}
-	}
-}
-void keyListener(int key,int event){
-	if(key>=37&&key<=40){
-		if(event==0&&even==2){
-			even=1;
-		}else if(event==0&&even==1){
-			even=0;
-		}else if(event==1){
-			even=2;
-		}
-		if(even==1){
-			snakehead->snake_direction=key;
-			beginPaint();
-			clearDevice();
-			endPaint();
-			snake_door(door_1_x,door_1_y);
-			snake_door(door_2_x,door_2_y);
-			snake_eat();
-			snake_move();
-			snake_draw(eat_x,eat_y);
-			
-			
-				
-		}
-	//printf("key = %d,event = %d\n ",key,event);
-	} 	
-}
-void timerListener(int id){
-	switch (id){
+	switch(z){
 		case 0:
-			beginPaint();
-			clearDevice();
-			endPaint();
-			snake_door(door_1_x,door_1_y);
-			snake_door(door_2_x,door_2_y);
-			snake_eat();
-			snake_move();
-			snake_draw(eat_x,eat_y);
-			
+			for(i=y+1*bl;i<y+2*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+7*bl;i++){
+				line(x+2*bl,i,x+3*bl,i);
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+8*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			break;
+		case 1:
+			for(i=y+1*bl;i<y+8*bl;i++){
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			break;
+		case 2:
+			for(i=y+1*bl;i<y+2*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+4*bl;i++){
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+5*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+7*bl;i++){
+				line(x+2*bl,i,x+3*bl,i);
+			}
+			for(i;i<y+8*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			break;
+		case 3:
+			for(i=y+1*bl;i<y+2*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+4*bl;i++){
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+5*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+7*bl;i++){
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+8*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			break;
+		case 4:
+			for(i=y+1*bl;i<y+4*bl;i++){
+				line(x+2*bl,i,x+3*bl,i);
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+5*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+8*bl;i++){
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			break;
+		case 5:
+			for(i=y+1*bl;i<y+2*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+4*bl;i++){
+				line(x+2*bl,i,x+3*bl,i);
+			}
+			for(i;i<y+5*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+7*bl;i++){
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+8*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			break;
+		case 6:
+			for(i=y+1*bl;i<y+2*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+4*bl;i++){
+				line(x+2*bl,i,x+3*bl,i);
+			}
+			for(i;i<y+5*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+7*bl;i++){
+				line(x+2*bl,i,x+3*bl,i);
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+8*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			break;
+		case 7:
+			for(i=y+1*bl;i<y+2*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+8*bl;i++){
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			break;
+		case 8:
+			for(i=y+1*bl;i<y+2*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+4*bl;i++){
+				line(x+2*bl,i,x+3*bl,i);
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+5*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+7*bl;i++){
+				line(x+2*bl,i,x+3*bl,i);
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+8*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			break;
+		case 9:
+			for(i=y+1*bl;i<y+2*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+4*bl;i++){
+				line(x+2*bl,i,x+3*bl,i);
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+5*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+7*bl;i++){
+				line(x+6*bl,i,x+7*bl,i);
+			}
+			for(i;i<y+8*bl;i++){
+				line(x+2*bl,i,x+7*bl,i);
+			}
 			break;
 	}
 }
+void refresh(){
+	beginPaint();
+	clearDevice();
+	endPaint();
+	bg();
+	int i=0;
+	beginPaint();
+	for(i=0;i<x_x*y_y;i++){
+		
+		if(site[i][1]==-1&&site[i][0]!=0){
+			setPenColor(RGB(120,120,120));
+			num_mode(i%x_x*mp,i/x_x*mp,site[i][0],mp/9);
+		}else if(site[i][1]==0&&site[i][0]!=0){
+			num_mode(i%x_x*mp,i/x_x*mp,site[i][0],mp/9);
+		}else if(site[i][1]==1&&site[i][0]!=0){
+			setPenColor(RGB(255,0,0));
+			num_mode(i%x_x*mp,i/x_x*mp,site[i][0],mp/9);
+		}else if(site[i][1]==2&&site[i][0]!=0){
+			setPenColor(RGB(0,255,0));
+			num_mode(i%x_x*mp,i/x_x*mp,site[i][0],mp/9);
+		}
+		setPenColor(BLACK);
+		
+	}
+	num_mode(9*mp+mp/3,6*mp+mp/3,nandu/10,mp/7);
+	num_mode(10*mp+mp/3,6*mp+mp/3,nandu%10,mp/7);
+	num_mode(9*mp,7*mp+mp/3*2,place/1000,mp/10);
+	num_mode(9*mp+mp/3*2,7*mp+mp/3*2,place/100%10,mp/10);
+	num_mode(10*mp+mp/3,7*mp+mp/3*2,place%100/10,mp/10);
+	num_mode(11*mp,7*mp+mp/3*2,place%10,mp/10);
+	endPaint();
+	for(i=0;i<81;i++){
+		if(check(site,i)==0){
+			break;
+		}
+	}
+	//printf("当前难度系数：%d\n",nandu);
+	if(i==81){
+		time_end = time(NULL);
+		printf("YOU WON!!!\ntime = %d min %d s\n",(time_end-time_start)/60,(time_end-time_start)%60);
+		start();
+	}
+}
+int check(int p[][2],int cnt){
+    //printf("P[cnt] = %d,cnt = %d\n", p[cnt],cnt);
+    if(p[cnt][0]==0){
+    	return 0;
+	}
+    int ch[10];
+    int i = 0;
+    for (i = 0; i < 10;i++){
+        ch[i] = 0;
+    }
+    
+    for (i = cnt; i >= 0;i-=9)//列验证
+    {
+        ch[p[i][0]]++;
+    }
+    for (i = 1; i < 10;i++){
+        if(ch[i]>1){
+            return 0;
+        }else{
+            ch[i] = 0;
+        }
+    }
 
-void initi(){
-	snake *p=snakehead;
-	p->next=NULL;
-	p->snake_direction=39;
-	p->snake_x=20;
-	p->snake_y=20;
+
+    for (i = cnt; i % 9 != 0;i--){//行验证
+        ch[p[i][0]]++;
+    }
+    ch[p[i][0]]++;//验证每行第一个元素
+    for (i = 1; i < 10;i++){
+        if(ch[i]>1){
+            return 0;
+        }else{
+            ch[i] = 0;
+        }
+    }
+    int j = 0;
+    int n = 0;
+    for (j = (cnt / 9) % 3; j >= 0;j--){//验证九宫格
+        if (n != 0){//第一次循环只需要判断该数据前的几个数据
+            for (i = cnt - n * 9; i % 9 % 3 != 2;i++);//一次以后的循环需要判断该九宫格内该行的三个元素
+                                                        //故需要将 i % 9 % 3的值增加到2
+        }else{
+            i = cnt;
+        }
+
+        for (; i % 9 % 3 != 0; i--)
+        {
+            ch[p[i][0]]++;
+        }
+        ch[p[i][0]]++;
+        n++;
+    }
+    for (i = 1; i < 10;i++){
+        if(ch[i]>1){
+            return 0;
+        }else{
+            ch[i] = 0;
+        }
+    }
+    return 1;
+}
+void mouseListener(int x,int y,int button,int event){
+	int x1=0;
+	int y1=0;
+	x1=x/mp;
+	y1=y/mp;
+	//printf("mid = %d\n",button);
+	if(button==1&&event==0&&x1<9&&site[x1+y1*x_x][1]!=-1){
+		
+		if(site[x1+y1*x_x][0]<9){
+			site[x1+y1*x_x][0]++;
+		}else{
+			site[x1+y1*x_x][0]=0;
+		}
+		refresh();
+	}
+	if(button==1&&event==0&&x1==10&&y1==1){
+		//printf("当前难度系数：%d\n",nandu);
+		start();
+	}
+	if(button==1&&event==0&&x1==10&&y1==3){
+		nandu-=5;
+		//printf("当前难度系数：%d\n",nandu);
+		start();
+	}
+	if(button==1&&event==0&&x1==10&&y1==5){
+		nandu+=5;
+		//printf("当前难度系数：%d\n",nandu);
+		start();
+	}
+	if(button==3&&event==0&&x1<9&&site[x1+y1*x_x][1]!=-1){
+		//site[x1+y1*x_x][1]=2;
+		/*if(site[x1+y1*x_x][0]==0){
+			site[x1+y1*x_x][0]=9;
+		}else if(site[x1+y1*x_x][0]!=1){
+			site[x1+y1*x_x][0]--;
+		}else{
+			site[x1+y1*x_x][0]=9;
+		}*/
+		if(site[x1+y1*x_x][0]==0){
+			site[x1+y1*x_x][0]=9;
+		}else{
+			site[x1+y1*x_x][0]--;
+		}
+		refresh();
+	}
+	if(button==2&&event==0&&x1<9&&site[x1+y1*x_x][1]!=-1&&site[x1+y1*x_x][1]!=2){
+		site[x1+y1*x_x][1]++;
+		refresh();
+	}else if(button==2&&event==0&&x1<9&&site[x1+y1*x_x][1]!=-1){
+		site[x1+y1*x_x][1]=0;
+		refresh();
+	}
 	
 }
 
+void start(){
+	int i=0;
+	bg();
+	
+	for(i=0;i<x_x*y_y;i++){
+		site[i][0]=0;
+		site[i][1]=0;
+	}
+	
+	for(i=0;i<nandu;i++){
+		site[rand()%(x_x*y_y)][1]=-1;
+	}
+	FILE *fp = fopen("data.txt", "r");
+	int cnt=0;
+	int num=0;
+	int data=0;
+	fscanf(fp,"%d",&num);
+	place=rand()%(num/10)*10+rand()%(10);
+	//printf("place = %d\n",place);
+	for(i=0;i<place;i++){
+		while(data>-1){
+			fscanf(fp,"%d",&data);
+		}
+		data=0;
+		cnt++;	
+	}
+	//fscanf(fp,"%d",&data);
+	//printf("cnt = %d\n",cnt);
+	for(i=0;i<x_x*y_y;i++){
+		fscanf(fp,"%d",&site[i][0]);
+	}
+	fclose(fp);
+	for(i=0;i<x_x*y_y;i++){
+		if(site[i][1]==0){
+			site[i][0]=0;
+		} 
+		
+		//site[i][1]=0;
+	}
+	time_start = time(NULL);
+	refresh();
+}
 
 int Setup(){
+	srand(time(0));
 	initConsole();
-	initWindow("贪食蛇",200,200,800,480);
-	initi();
-	loca_res();
-	snake_eat();
-	registerKeyboardEvent(keyListener);
-	registerTimerEvent(timerListener);
-	startTimer(0,300);
+	initWindow("数独",250,100,x_x*mp+3*mp,y_y*mp+1);
+	printf("说明书：\n右边\n第1个按钮刷新数独\n第2个按钮增加难度\n第3个按钮降低难度");
+	printf("\n第1行数字为难度系数，值越大，难度越低\n第2行为数独所在list位置编号\n");
+	printf("鼠标左键控制数字上调，右键控制数值下调\n>_<--祝游戏愉快-->_<\n");
+	start();
+	registerMouseEvent(mouseListener);
 	return 0;
 }
  
